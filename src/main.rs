@@ -1,9 +1,7 @@
-use std::io::{stdin};
-use hyper::{Client, Uri};
-use hyper_tls::HttpsConnector;
 use std::error::Error;
-use hyper::body::HttpBody as _;
-use tokio::io::{stdout, AsyncWriteExt as _};
+use std::io::{stdin};
+
+mod helpers;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>>{
@@ -23,7 +21,7 @@ async fn main() -> Result<(), Box<dyn Error>>{
 
     println!("Fetching for {}", s);
 
-    let response = fetch().await;
+    let response = helpers::fetch::fetch().await;
 
     match response {
         Ok(()) => {
@@ -33,26 +31,6 @@ async fn main() -> Result<(), Box<dyn Error>>{
         Err(error) => {
             println!("{error}");
         }
-    }
-
-    Ok(())
-}
-
-async fn fetch()->Result<(), Box<dyn Error>>{
-    // Create new hyper client
-    let https = HttpsConnector::new();
-    let client = Client::builder().build::<_, hyper::Body>(https);
-
-    let uri: Uri = "https://jsonplaceholder.typicode.com/users".parse().unwrap();
-
-    // Make a GET request to entered API
-    let mut res = client.get(uri).await?;
-
-    // Print status
-    println!("Response: {}", res.status());
-
-    while let Some(chunk) = res.body_mut().data().await {
-        stdout().write_all(&chunk?).await?;
     }
 
     Ok(())
